@@ -1,0 +1,4 @@
+# raw video masters are usually too big for GitHub
+art/originals/*.mp4
+art/originals/*.mov
+.DS_Store
