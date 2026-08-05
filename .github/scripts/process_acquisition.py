@@ -6,11 +6,13 @@ from __future__ import annotations
 import json
 import os
 import re
+import subprocess
 import sys
 import urllib.error
 import urllib.request
 from io import BytesIO
 from pathlib import Path
+from urllib.parse import urlparse
 
 from PIL import Image
 
@@ -63,14 +65,19 @@ def require_fields(fields: dict[str, str]) -> tuple[str, str, str, str, str]:
 
 
 def find_image_url(body: str) -> str:
-    urls = IMAGE_URL_RE.findall(body or "")
+    text = body or ""
+    urls = IMAGE_URL_RE.findall(text)
     if not urls:
-        loose = re.findall(r"!\[[^\]]*\]\((https://[^)\s]+)\)", body or "")
+        loose = re.findall(
+            r"(?:src=[\"']|!\[[^\]]*\]\()(https://[^\"'\s)]+)",
+            text,
+        )
         urls = [
-            u
+            u.rstrip(").,;")
             for u in loose
             if "githubusercontent.com" in u or "user-attachments/assets" in u
         ]
+    urls = [u.rstrip(").,;") for u in urls]
     if not urls:
         raise AcquisitionError(
             "No image attachment found. Attach exactly one photo to the issue and try again."
@@ -89,20 +96,67 @@ def slugify(title: str) -> str:
     return s[:60]
 
 
+class _StripAuthOnRedirect(urllib.request.HTTPRedirectHandler):
+    """GitHub attachment URLs 302 to a signed host; forwarding Auth causes HTTP 400."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        new_req = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if new_req is None:
+            return None
+        old_host = urlparse(req.full_url).netloc
+        new_host = urlparse(newurl).netloc
+        if old_host != new_host and new_req.has_header("Authorization"):
+            new_req.remove_header("Authorization")
+        return new_req
+
+
 def download(url: str, token: str) -> bytes:
+    url = url.rstrip(").,;")
+    # curl strips Authorization on cross-host redirects — reliable for user-attachments.
+    try:
+        proc = subprocess.run(
+            [
+                "curl",
+                "-fsSL",
+                "--max-time",
+                "120",
+                "-H",
+                f"Authorization: Bearer {token}",
+                "-H",
+                "Accept: */*",
+                "-H",
+                "User-Agent: hana-gallery-acquisition-bot",
+                "-o",
+                "-",
+                url,
+            ],
+            check=False,
+            capture_output=True,
+        )
+        if proc.returncode == 0 and proc.stdout:
+            return proc.stdout
+        curl_err = (proc.stderr or b"").decode("utf-8", errors="replace").strip()
+        print(f"curl download failed ({proc.returncode}): {curl_err}", file=sys.stderr)
+    except FileNotFoundError:
+        print("curl not available; falling back to urllib", file=sys.stderr)
+
+    opener = urllib.request.build_opener(_StripAuthOnRedirect())
     req = urllib.request.Request(
         url,
         headers={
             "Authorization": f"Bearer {token}",
-            "Accept": "application/octet-stream",
+            "Accept": "*/*",
             "User-Agent": "hana-gallery-acquisition-bot",
         },
     )
     try:
-        with urllib.request.urlopen(req, timeout=120) as resp:
+        with opener.open(req, timeout=120) as resp:
             data = resp.read()
     except urllib.error.HTTPError as e:
-        raise AcquisitionError(f"Failed to download image ({e.code}): {url}") from e
+        body = e.read()[:300] if e.fp else b""
+        raise AcquisitionError(
+            f"Failed to download image ({e.code}): {url} — {body!r}"
+        ) from e
     if not data:
         raise AcquisitionError("Downloaded image is empty.")
     return data

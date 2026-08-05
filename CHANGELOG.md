@@ -1,5 +1,5 @@
 ﻿## CHANGELOG
 
-- What: Extracted ARTWORKS into art.json; added New acquisition issue template + GitHub Action that publishes phone-submitted art.
-- Why: Monthly phone ritual without editing HTML; keep content in one small JSON file.
-- Files: art.json, index.html, README.md, CHANGELOG.md, .github/ISSUE_TEMPLATE/new-acquisition.yml, .github/scripts/process_acquisition.py, .github/workflows/new-acquisition.yml
+- What: Fixed acquisition image download (HTTP 400 on user-attachments) by using curl + stripping Auth on redirects; accept HTML img src attachments.
+- Why: Phone uploads failed after attach; GitHub returns 400 when Accept/Auth headers are forwarded wrong.
+- Files: .github/scripts/process_acquisition.py, CHANGELOG.md
