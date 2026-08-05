@@ -1,6 +1,15 @@
 [
   {
     "type": "image",
+    "src": "art/2026-08-05-rainbow-love.jpg",
+    "title": "Rainbow Love",
+    "medium": "Marker on paper",
+    "date": "February 20026",
+    "category": "Drawings",
+    "note": "<img width=\"1200\" height=\"1600\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/9612a6f2-73bd-449e-80fd-9ae6bb7cb2bc\" />"
+  },
+  {
+    "type": "image",
     "src": "art/2026-02-yum-hot-dog.jpg",
     "title": "Yum! Hot Dog",
     "medium": "Marker on paper",
