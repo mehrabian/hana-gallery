@@ -1,0 +1,111 @@
+name: New acquisition
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  publish:
+    if: contains(github.event.issue.labels.*.name, 'new-acquisition')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Pillow
+        run: pip install --quiet pillow
+
+      - name: Process acquisition
+        id: process
+        continue-on-error: true
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_CREATED_AT: ${{ github.event.issue.created_at }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RESULT_PATH: acquisition-result.json
+        run: python .github/scripts/process_acquisition.py
+
+      - name: Read result
+        id: result
+        if: always()
+        run: |
+          set -eo pipefail
+          if [ ! -f acquisition-result.json ]; then
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "message=Processor did not write a result file." >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          data = json.loads(Path("acquisition-result.json").read_text(encoding="utf-8"))
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+              f.write(f"ok={'true' if data.get('ok') else 'false'}\n")
+              msg = str(data.get("message", "")).replace("%", "%25").replace("\n", "%0A").replace("\r", "")
+              f.write(f"message={msg}\n")
+              title = str(data.get("title", "")).replace("%", "%25").replace("\n", "%0A").replace("\r", "")
+              src = str(data.get("src", "")).replace("%", "%25").replace("\n", "%0A").replace("\r", "")
+              f.write(f"title={title}\n")
+              f.write(f"src={src}\n")
+          PY
+
+      - name: Commit and push
+        if: steps.result.outputs.ok == 'true'
+        env:
+          TITLE: ${{ steps.result.outputs.title }}
+        run: |
+          set -eo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add art.json art/
+          git status
+          git commit -m "Add: ${TITLE}"
+          git push
+
+      - name: Comment success and close
+        if: steps.result.outputs.ok == 'true'
+        uses: actions/github-script@v7
+        env:
+          RESULT_MESSAGE: ${{ steps.result.outputs.message }}
+        with:
+          script: |
+            const site = 'https://mehrabian.github.io/hana-gallery/';
+            const msg = `${process.env.RESULT_MESSAGE}\n\nGallery: ${site}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: msg,
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              state: 'closed',
+            });
+
+      - name: Comment failure
+        if: steps.result.outputs.ok != 'true'
+        uses: actions/github-script@v7
+        env:
+          RESULT_MESSAGE: ${{ steps.result.outputs.message }}
+        with:
+          script: |
+            const detail = process.env.RESULT_MESSAGE || 'unknown error';
+            const msg = `Could not publish this acquisition.\n\n**Error:** ${detail}\n\nFix the issue (attach one photo, fill Title/Medium/Date/Category) and open a **new** issue — edits to this issue will not re-run the Action.`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: msg,
+            });
+            core.setFailed(detail);
