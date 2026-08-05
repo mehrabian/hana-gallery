@@ -297,133 +297,35 @@
 
 <script>
 /* ==========================================================================
-   EDIT THIS SECTION — everything the site shows lives here.
+   Site config — artwork list lives in art.json (edit there, or file a
+   "New acquisition" GitHub issue from your phone).
    ========================================================================== */
 
 const CONFIG = {
-  artistName: "Hana",              // ← your daughter's name
-  establishedYear: 2026,           // year the gallery opened
+  artistName: "Hana",
+  establishedYear: 2026,
   tagline: "Original works in crayon, marker, watercolor, and glitter glue. All pieces from the artist's private studio (the kitchen table)."
 };
 
-/* Demo placeholder "drawings" — delete this block and swap src values for real files. */
-function DEMO_SVG(inner, bg){
+function placeholderThumb(){
   return "data:image/svg+xml;utf8," + encodeURIComponent(
     `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'>
-      <rect width='400' height='300' fill='${bg}'/>
-      <g stroke-linecap='round' stroke-linejoin='round' fill='none'>${inner}</g>
+      <rect width='400' height='300' fill='#DDD8CC'/>
     </svg>`);
 }
-var DEMO = {
-  sun: DEMO_SVG(`
-    <circle cx='200' cy='140' r='58' fill='#F5C31D' stroke='#E8A012' stroke-width='6'/>
-    <path d='M200 55 200 25 M200 225 200 255 M115 140 85 140 M285 140 315 140 M140 80 118 58 M260 80 282 58 M140 200 118 222 M260 200 282 222' stroke='#E8A012' stroke-width='8'/>
-    <circle cx='182' cy='130' r='6' fill='#26241F'/><circle cx='218' cy='130' r='6' fill='#26241F'/>
-    <path d='M175 158 Q200 180 225 158' stroke='#26241F' stroke-width='6'/>`, '#EAF4FB'),
-  house: DEMO_SVG(`
-    <path d='M110 150 L200 80 L290 150' stroke='#E64832' stroke-width='10'/>
-    <rect x='125' y='150' width='150' height='100' stroke='#2E7DB2' stroke-width='8' fill='#FFF7E0'/>
-    <rect x='150' y='170' width='30' height='30' stroke='#2E7DB2' stroke-width='6'/>
-    <rect x='220' y='170' width='30' height='30' stroke='#2E7DB2' stroke-width='6'/>
-    <rect x='185' y='200' width='32' height='50' stroke='#3E9B57' stroke-width='6' fill='#3E9B57' fill-opacity='.3'/>
-    <path d='M60 250 L340 250' stroke='#3E9B57' stroke-width='8'/>
-    <circle cx='330' cy='60' r='22' fill='#F5C31D'/>`, '#F2FAF0'),
-  cat: DEMO_SVG(`
-    <ellipse cx='200' cy='190' rx='70' ry='55' stroke='#26241F' stroke-width='7' fill='#F5C31D' fill-opacity='.5'/>
-    <circle cx='200' cy='110' r='45' stroke='#26241F' stroke-width='7' fill='#F5C31D' fill-opacity='.5'/>
-    <path d='M168 80 L160 45 L190 68 M232 80 L240 45 L210 68' stroke='#26241F' stroke-width='7' fill='#F5C31D'/>
-    <circle cx='185' cy='105' r='5' fill='#26241F'/><circle cx='215' cy='105' r='5' fill='#26241F'/>
-    <path d='M195 122 Q200 128 205 122 M200 128 200 135 M155 115 120 108 M155 125 120 128 M245 115 280 108 M245 125 280 128' stroke='#26241F' stroke-width='4'/>
-    <path d='M265 200 Q305 180 295 145' stroke='#26241F' stroke-width='7'/>`, '#FBEFEA'),
-  rainbow: DEMO_SVG(`
-    <path d='M80 240 A120 120 0 0 1 320 240' stroke='#E64832' stroke-width='14'/>
-    <path d='M100 240 A100 100 0 0 1 300 240' stroke='#F5C31D' stroke-width='14'/>
-    <path d='M120 240 A80 80 0 0 1 280 240' stroke='#3E9B57' stroke-width='14'/>
-    <path d='M140 240 A60 60 0 0 1 260 240' stroke='#2E7DB2' stroke-width='14'/>
-    <ellipse cx='85' cy='245' rx='38' ry='20' fill='white' stroke='#C8D8E4' stroke-width='4'/>
-    <ellipse cx='318' cy='245' rx='38' ry='20' fill='white' stroke='#C8D8E4' stroke-width='4'/>`, '#EAF4FB'),
-  flowers: DEMO_SVG(`
-    <path d='M100 260 100 190 M200 260 200 175 M300 260 300 195' stroke='#3E9B57' stroke-width='8'/>
-    <g fill='#E64832'><circle cx='100' cy='170' r='16'/><circle cx='82' cy='185' r='16'/><circle cx='118' cy='185' r='16'/><circle cx='100' cy='198' r='16'/></g>
-    <circle cx='100' cy='184' r='11' fill='#F5C31D'/>
-    <g fill='#2E7DB2'><circle cx='200' cy='155' r='16'/><circle cx='182' cy='170' r='16'/><circle cx='218' cy='170' r='16'/><circle cx='200' cy='183' r='16'/></g>
-    <circle cx='200' cy='169' r='11' fill='#F5C31D'/>
-    <g fill='#F5C31D'><circle cx='300' cy='175' r='16'/><circle cx='282' cy='190' r='16'/><circle cx='318' cy='190' r='16'/><circle cx='300' cy='203' r='16'/></g>
-    <circle cx='300' cy='189' r='11' fill='#E64832'/>`, '#F2FAF0'),
-  abstract: DEMO_SVG(`
-    <path d='M60 220 Q120 80 180 190 T310 120' stroke='#E64832' stroke-width='12'/>
-    <path d='M70 120 Q160 240 250 140 T340 220' stroke='#2E7DB2' stroke-width='12'/>
-    <path d='M90 70 Q200 160 320 70' stroke='#F5C31D' stroke-width='12'/>
-    <circle cx='120' cy='230' r='14' fill='#3E9B57'/>
-    <circle cx='290' cy='210' r='10' fill='#E64832'/>
-    <circle cx='250' cy='70' r='12' fill='#2E7DB2'/>`, '#FFFDF5')
-};
 
-/*
-  HOW TO ADD A NEW PIECE (monthly routine):
-  1. Put the photo/scan in an /art folder next to this file (e.g. art/rainbow.jpg)
-  2. Copy one of the blocks below, paste it at the TOP of the list, and fill it in.
-
-  Fields:
-    type:     "image" | "video-youtube" | "video-file"
-    src:      "art/rainbow.jpg"  (image or video file path)
-              or the YouTube video ID e.g. "dQw4w9WgXcQ" for video-youtube
-    poster:   (videos only, optional) thumbnail image path
-    title:    what she calls it
-    medium:   e.g. "Crayon on printer paper" — museum-style
-    date:     e.g. "March 2026 · age 5"
-    category: "Drawings" | "Paintings" | "Crafts" | "Videos"  (or invent new ones — filters build themselves)
-    note:     (optional) the story behind it, shown in the detail view
-*/
-
-const ARTWORKS = [
-  {
-    type: "image",
-    src: "art/2026-02-yum-hot-dog.jpg",
-    title: "Yum! Hot Dog",
-    medium: "Marker on paper",
-    date: "February 2026",
-    category: "Drawings",
-    note: "A kawaii hot dog with milkshake and bacon. The speech bubble says it all."
-  },
-  {
-    type: "image",
-    src: "art/2026-01-rainbow-love.jpg",
-    title: "Rainbow Love",
-    medium: "Marker on paper",
-    date: "January 2026",
-    category: "Drawings",
-    note: "A rainbow arch with a smiling friend inside, plus hearts and a sun."
-  }
-
-  /* --- Video example: uncomment and fill in ---
-  ,{
-    type: "video-youtube",
-    src: "YOUTUBE_VIDEO_ID",
-    poster: "art/dance-thumbnail.jpg",
-    title: "Studio Tour",
-    medium: "Video · 1 min 12 sec",
-    date: "August 2026 · age 5",
-    category: "Videos",
-    note: "The artist walks us through her latest works."
-  }
-  ,{
-    type: "video-file",
-    src: "art/painting-timelapse.mp4",
-    poster: "art/timelapse-thumb.jpg",
-    title: "Painting a Rainbow (Timelapse)",
-    medium: "Video · 45 sec",
-    date: "August 2026 · age 5",
-    category: "Videos"
-  }
-  --- */
-];
+function escapeHtml(s){
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
 
 /* ==========================================================================
    You shouldn't need to edit below this line.
    ========================================================================== */
 
-/* ---- render ---- */
 document.getElementById('artist-name').textContent = CONFIG.artistName;
 document.getElementById('est-year').textContent = CONFIG.establishedYear;
 document.getElementById('tagline').textContent = CONFIG.tagline;
@@ -431,6 +333,7 @@ document.title = CONFIG.artistName + "'s Gallery — A Permanent Collection";
 
 const wall = document.getElementById('wall');
 const filtersEl = document.getElementById('filters');
+let ARTWORKS = [];
 let activeFilter = 'All';
 let visible = [];
 
@@ -440,7 +343,7 @@ function thumbFor(a){
   if (a.type === 'image') return a.src;
   if (a.poster) return a.poster;
   if (a.type === 'video-youtube') return 'https://img.youtube.com/vi/' + a.src + '/hqdefault.jpg';
-  return DEMO_SVG('', '#DDD8CC');
+  return placeholderThumb();
 }
 
 function renderFilters(){
@@ -467,13 +370,13 @@ function renderWall(){
     const isVideo = a.type !== 'image';
     card.innerHTML = `
       <div class="frame">
-        <img class="thumb" src="${thumbFor(a)}" alt="${a.title}" loading="lazy">
+        <img class="thumb" src="${escapeHtml(thumbFor(a))}" alt="${escapeHtml(a.title)}" loading="lazy">
         ${isVideo ? `<span class="video-badge" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>` : ''}
       </div>
       <div class="placard">
-        <div class="cat">${catNo(a._i)}${a.category ? ' · ' + a.category : ''}</div>
-        <div class="title">${a.title}</div>
-        <div class="medium">${a.medium || ''}${a.date ? ' — ' + a.date : ''}</div>
+        <div class="cat">${catNo(a._i)}${a.category ? ' · ' + escapeHtml(a.category) : ''}</div>
+        <div class="title">${escapeHtml(a.title)}</div>
+        <div class="medium">${escapeHtml(a.medium || '')}${a.date ? ' — ' + escapeHtml(a.date) : ''}</div>
       </div>`;
     card.addEventListener('click', () => openLightbox(vi));
     wall.appendChild(card);
@@ -506,17 +409,17 @@ function showPiece(){
   const a = visible[lbIndex];
   if (!a) return;
   if (a.type === 'image'){
-    lbMedia.innerHTML = `<img src="${a.src}" alt="${a.title}">`;
+    lbMedia.innerHTML = `<img src="${escapeHtml(a.src)}" alt="${escapeHtml(a.title)}">`;
   } else if (a.type === 'video-youtube'){
-    lbMedia.innerHTML = `<div class="video-wrap"><iframe src="https://www.youtube-nocookie.com/embed/${a.src}" title="${a.title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+    lbMedia.innerHTML = `<div class="video-wrap"><iframe src="https://www.youtube-nocookie.com/embed/${escapeHtml(a.src)}" title="${escapeHtml(a.title)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
   } else {
-    lbMedia.innerHTML = `<div class="video-wrap"><video src="${a.src}" ${a.poster ? `poster="${a.poster}"` : ''} controls></video></div>`;
+    lbMedia.innerHTML = `<div class="video-wrap"><video src="${escapeHtml(a.src)}" ${a.poster ? `poster="${escapeHtml(a.poster)}"` : ''} controls></video></div>`;
   }
   lbCaption.innerHTML = `
-    <div class="cat">${catNo(a._i)}${a.category ? ' · ' + a.category : ''}</div>
-    <h2>${a.title}</h2>
-    <div class="medium">${a.medium || ''}${a.date ? ' — ' + a.date : ''}</div>
-    ${a.note ? `<p class="note">${a.note}</p>` : ''}`;
+    <div class="cat">${catNo(a._i)}${a.category ? ' · ' + escapeHtml(a.category) : ''}</div>
+    <h2>${escapeHtml(a.title)}</h2>
+    <div class="medium">${escapeHtml(a.medium || '')}${a.date ? ' — ' + escapeHtml(a.date) : ''}</div>
+    ${a.note ? `<p class="note">${escapeHtml(a.note)}</p>` : ''}`;
   document.getElementById('lb-prev').disabled = lbIndex === 0;
   document.getElementById('lb-next').disabled = lbIndex === visible.length - 1;
 }
@@ -531,8 +434,24 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight' && lbIndex < visible.length - 1){ lbIndex++; showPiece(); }
 });
 
-renderFilters();
-renderWall();
+async function loadArtworks(){
+  const res = await fetch('art.json', { cache: 'no-store' });
+  if (!res.ok){
+    throw new Error('Failed to load art.json: HTTP ' + res.status);
+  }
+  const data = await res.json();
+  if (!Array.isArray(data)){
+    throw new Error('art.json must be a JSON array');
+  }
+  ARTWORKS = data;
+  renderFilters();
+  renderWall();
+}
+
+loadArtworks().catch(err => {
+  console.error(err);
+  wall.innerHTML = '<p style="grid-column:1/-1;text-align:center;font-family:var(--serif);color:var(--crayon-red);">Could not load the collection (art.json). Check the console.</p>';
+});
 </script>
 </body>
 </html>

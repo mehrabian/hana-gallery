@@ -1,0 +1,59 @@
+name: New acquisition
+description: Add a new artwork to Hana's Gallery from your phone
+title: "Acquisition: "
+labels: ["new-acquisition"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Attach **exactly one photo** of the piece (paperclip / image button below), then fill the fields.
+        The gallery updates itself in about two minutes after you submit.
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      description: What Hana calls it
+      placeholder: Rainbow Love
+    validations:
+      required: true
+  - type: input
+    id: medium
+    attributes:
+      label: Medium
+      description: Museum-style medium line
+      placeholder: Marker on paper
+    validations:
+      required: true
+  - type: input
+    id: date
+    attributes:
+      label: Date
+      description: When it was made (shown on the placard)
+      placeholder: February 2026
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Drawings
+        - Paintings
+        - Crafts
+        - Videos
+      default: 0
+    validations:
+      required: true
+  - type: textarea
+    id: note
+    attributes:
+      label: Note
+      description: Optional story shown in the detail view
+      placeholder: Drawn before breakfast. The sun is smiling because it is Saturday.
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: |
+        ### Photo
+        Use the comment box's image / attach control to add **one** photo of the artwork before submitting.

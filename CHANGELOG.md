@@ -1,4 +1,5 @@
-## CHANGELOG
-- What: Added two real artworks (Rainbow Love, Jan 2026; Yum! Hot Dog, Feb 2026); removed demo placeholders from ARTWORKS.
-- Why: First real acquisitions for the permanent collection.
-- Files: index.html, art/2026-01-rainbow-love.jpg, art/2026-02-yum-hot-dog.jpg, art/originals/*, CHANGELOG.md
+﻿## CHANGELOG
+
+- What: Extracted ARTWORKS into art.json; added New acquisition issue template + GitHub Action that publishes phone-submitted art.
+- Why: Monthly phone ritual without editing HTML; keep content in one small JSON file.
+- Files: art.json, index.html, README.md, CHANGELOG.md, .github/ISSUE_TEMPLATE/new-acquisition.yml, .github/scripts/process_acquisition.py, .github/workflows/new-acquisition.yml
