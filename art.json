@@ -1,6 +1,15 @@
 [
   {
     "type": "image",
+    "src": "art/2026-08-07-first-wheel.jpg",
+    "title": "First wheel",
+    "medium": "I am happy when I make lego. Also, I am happy when I make robots.",
+    "date": "February 2026",
+    "category": "Drawings",
+    "note": "<img width=\"3024\" height=\"4032\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/96dcc5c8-f797-4400-842b-223614c97af0\" />"
+  },
+  {
+    "type": "image",
     "src": "art/2026-08-05-rainbow-love.jpg",
     "title": "Rainbow Love",
     "medium": "Marker on paper",
